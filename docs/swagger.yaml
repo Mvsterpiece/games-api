@@ -1,0 +1,60 @@
+openapi: 3.0.2
+info:
+    title: Games-API
+    version: 1.0.0
+    description: '### This is a Swagger UI for our Games API'
+paths:
+    /games:
+        description: ''
+        get:
+            tags:
+                - games
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                            examples:
+                                List of games:
+                                    value:
+                                        - Witcher 3
+                                        - Mutli Theft Auto
+                    description: 'Returns a list of games, kus games on vastav sinu API-le'
+            summary: Get a list of all games
+            description: Returns a list of all games in API
+    '/games/{id}':
+        get:
+            tags:
+                - details
+            parameters:
+                -
+                    name: id
+                    in: path
+                    required: true
+            responses:
+                '200':
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                            examples:
+                                Full details of a given game:
+                                    value: '    { id: 1, name: "Witcher 3", price: 29.99 }'
+                    description: Returns full details of a given id game
+            operationId: id
+            summary: Get full details of a game
+            description: Returns full details of a given id game
+components:
+    schemas:
+        error:
+            title: Root Type for error
+            description: ''
+            type: object
+            properties:
+                error:
+                    type: string
+            example:
+                error: Error message.
