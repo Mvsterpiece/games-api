@@ -1,60 +1,119 @@
 openapi: 3.0.2
 info:
-    title: Games-API
-    version: 1.0.0
-    description: '### This is a Swagger UI for our Games API'
+  title: Games-API
+  version: 1.0.0
+  description: '### This is a Swagger UI for our Games API'
 paths:
-    /games:
-        description: ''
-        get:
-            tags:
-                - games
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema:
-                                type: array
-                                items:
-                                    type: string
-                            examples:
-                                List of games:
-                                    value:
-                                        - Witcher 3
-                                        - Mutli Theft Auto
-                    description: 'Returns a list of games, kus games on vastav sinu API-le'
-            summary: Get a list of all games
-            description: Returns a list of all games in API
-    '/games/{id}':
-        get:
-            tags:
-                - details
-            parameters:
-                -
-                    name: id
-                    in: path
-                    required: true
-            responses:
-                '200':
-                    content:
-                        application/json:
-                            schema:
-                                type: string
-                            examples:
-                                Full details of a given game:
-                                    value: '    { id: 1, name: "Witcher 3", price: 29.99 }'
-                    description: Returns full details of a given id game
-            operationId: id
-            summary: Get full details of a game
-            description: Returns full details of a given id game
-components:
-    schemas:
-        error:
-            title: Root Type for error
-            description: ''
-            type: object
-            properties:
-                error:
+  /games:
+    description: 'Endpoint for managing games.'
+    get:
+      tags:
+        - games
+      responses:
+        '200':
+          description: 'Returns a list of games.'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              examples:
+                List_of_games:
+                  value:
+                    - Witcher 3
+                    - Mutli Theft Auto
+      summary: Get a list of all games
+    post:
+      tags:
+        - games
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'The name of the game.'
+                price:
+                  type: number
+                  description: 'The price of the game.'
+              required:
+                - name
+                - price
+      responses:
+        '201':
+          description: 'Game created successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
                     type: string
-            example:
-                error: Error message.
+                  price:
+                    type: number
+              example:
+                id: 1
+                name: Witcher 3
+                price: 29.99
+      summary: Add a new game
+  '/games/{id}':
+    get:
+      tags:
+        - details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'The ID of the game.'
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Returns full details of a given id game.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  price:
+                    type: number
+              example:
+                id: 1
+                name: Witcher 3
+                price: 29.99
+      operationId: getGameById
+      summary: Get full details of a game
+    delete:
+      tags:
+        - games
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 'The ID of the game to delete.'
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 'Game deleted successfully.'
+      summary: Delete a game
+components:
+  schemas:
+    error:
+      title: Root Type for error
+      description: ''
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: Error message.

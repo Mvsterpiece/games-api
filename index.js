@@ -1,12 +1,10 @@
 const express = require('express')
+const cors = require('cors')
+const { type } = require('express/lib/response')
 const app = express()
 const port = 8080
-const swaggerUi = require('swagger-ui-express')
-const yamljs = require('yamljs')
-const swaggerDocument = yamljs.load('./docs/swagger.yaml')
-
+app.use(cors())
 app.use(express.json())
-
 const games = [
     { id: 1, name: "Witcher 3", price: 29.99 },
     { id: 2, name: "Cyberpunk 2077", price: 59.99 },
@@ -21,53 +19,36 @@ const games = [
 app.get('/games', (req, res) => {
     res.send(games)
 })
-
 app.get('/games/:id', (req, res) => {
-    const gameId = parseInt(req.params.id)
-    const game = games.find(g => g.id === gameId)
-    if (!game) {
+    if (typeof games[req.params.id - 1] === 'undefined') {
         return res.status(404).send({ error: "Game not found" })
     }
-    res.send(game)
+    res.send(games[req.params.id - 1])
 })
 
 app.post('/games', (req, res) => {
-    if (!req.body.name || !req.body.price) {
-        return res.status(400).send({ error: 'One or all params are missing' })
-    }
-
-    const game = {
+    let game = {
         id: games.length + 1,
         price: req.body.price,
         name: req.body.name
     }
-
     games.push(game)
-
     res.status(201)
-        .location(`${getBaseUrl(req)}/games/${game.id}`)
+        .location(`${getBaseUrl(req)}/games/${games.length}`)
         .send(game)
 })
-
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
-
 app.delete('/games/:id', (req, res) => {
-    const gameId = parseInt(req.params.id)
-    const index = games.findIndex(g => g.id === gameId)
-    if (index === -1) {
-        return res.status(404).send({ error: "Game not found" })
+    if (typeof games[req.params.id - 1] === 'undefined') {
+        return res.status(404).send({error: "Game not found"})
     }
-
-    games.splice(index, 1)
-
-    res.status(204).send({ error: "No content" })
+    games.splice(req.params.id -1, 1)
+    res.status(204).send({error: "No content"})
+});
+app.listen(port, () => {
+    console.log(`API up at: http://localhost:${port}`)
 })
 
 function getBaseUrl(req) {
     return req.connection && req.connection.encrypted
         ? 'https' : 'http' + `://${req.headers.host}`
 }
-
-app.listen(port, () => {
-    console.log(`API up at: http://localhost:${port}`)
-})
