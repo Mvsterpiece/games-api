@@ -2,7 +2,7 @@ const app = Vue.createApp({
     data() {
         return {
             editingGame: null,
-            editedGame: { name: null, price: null },
+            editedGame: { id: null, name: null, price: null },
             games: [],
             newGameName: '',
             newGamePrice: 0,
@@ -14,31 +14,43 @@ const app = Vue.createApp({
     methods: {
         editGame: function (game) {
             this.editingGame = game;
-            this.editedGame = { ...game }; 
+            this.editedGame = { id: game.id, name: game.name, price: game.price };
+    
+            let editGameModal = new bootstrap.Modal(document.getElementById('editGameModal'));
+            editGameModal.show();
         },
         cancelEdit: function () {
             this.editingGame = null;
-            this.editedGame = { name: null, price: null };
+            this.editedGame = { id: null, name: null, price: null };
         },
         confirmEdit: async function () {
-            const response = await fetch(`http://localhost:8080/games/${this.editingGame.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: this.editedGame.name,
-                    price: parseFloat(this.editedGame.price),
-                }),
-            });
-
-            if (response.status === 200) {
-                this.fetchGames();
-                this.cancelEdit();
-            } else {
-                console.error('Failed to update game.');
+            if (!this.editedGame.name || isNaN(parseFloat(this.editedGame.price))) {
+                console.error('Invalid data for editing game.');
+                return;
             }
-        },
+        
+            try {
+                const response = await fetch(`http://localhost:8080/games/${this.editingGame.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: this.editedGame.name,
+                        price: parseFloat(this.editedGame.price),
+                    }),
+                });
+        
+                if (response.ok) {
+                    await this.fetchGames();
+                    this.cancelEdit();
+                } else {
+                    console.error('Failed to update game. Server returned:', response.status);
+                }
+            } catch (error) {
+                console.error('An error occurred during the update:', error);
+            }
+        }, 
         getGame: async function (id) {
             this.gameInModal = await (await fetch(`http://localhost:8080/games/${id}`)).json();
             let gameInfoModal = new bootstrap.Modal(document.getElementById('gameInfomodal'), {});
